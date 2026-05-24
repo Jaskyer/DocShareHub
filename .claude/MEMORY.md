@@ -1,0 +1,3 @@
+- [DocShareHub 文档托管平台](project_docsharehub.md) — FastAPI 企业文档平台，飞书 OAuth，四级安全，URL 重命名，回收站
+- [架构决策记录](architecture_decisions.md) — Starlette 0.38.6 request.state 传播问题，Windows 路径兼容，数据库迁移
+- [用户协作偏好](user_preferences.md) — 中文沟通，直切要点，不操作 git，注意密钥保密
