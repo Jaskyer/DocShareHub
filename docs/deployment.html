@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>部署文档 — 文档托管平台</title>
+<style>
+:root {
+  --primary: #1677FF;
+  --primary-hover: #4096FF;
+  --primary-active: #0958D9;
+  --primary-bg: #E6F4FF;
+  --primary-light: #BAE0FF;
+  --text-primary: #1F1F1F;
+  --text-secondary: #5C5C5C;
+  --text-tertiary: #8C8C8C;
+  --text-placeholder: #BFBFBF;
+  --bg-base: #F5F5F5;
+  --bg-container: #FFFFFF;
+  --bg-elevated: #FFFFFF;
+  --bg-layout: #F0F2F5;
+  --border-color: #E8E8E8;
+  --border-secondary: #F0F0F0;
+  --success: #52C41A;
+  --success-bg: #F6FFED;
+  --success-border: #B7EB8F;
+  --warning: #FAAD14;
+  --warning-bg: #FFFBE6;
+  --warning-border: #FFE58F;
+  --error: #FF4D4F;
+  --error-bg: #FFF2F0;
+  --error-border: #FFCCC7;
+  --info: #1677FF;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02);
+  --shadow-md: 0 3px 6px -4px rgba(0,0,0,0.12), 0 6px 16px rgba(0,0,0,0.08), 0 9px 28px rgba(0,0,0,0.05);
+  --shadow-lg: 0 6px 16px -8px rgba(0,0,0,0.08), 0 9px 28px rgba(0,0,0,0.05), 0 12px 48px rgba(0,0,0,0.03);
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans SC', sans-serif;
+  --mono: 'SF Mono', Monaco, 'Cascadia Code', 'Consolas', 'Noto Sans Mono', monospace;
+  --sidebar-w: 240px;
+  --header-h: 60px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-h) + 16px);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-family);
+  color: var(--text-primary);
+  background: var(--bg-layout);
+  line-height: 1.7;
+}
+
+/* ========= Header ========= */
+.doc-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--header-h);
+  background: var(--bg-container);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  gap: 16px;
+}
+.doc-header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.doc-header-logo svg { flex-shrink: 0; }
+.doc-header-logo span { white-space: nowrap; }
+.doc-header-divider { width: 1px; height: 20px; background: var(--border-color); }
+.doc-header-label { font-size: 14px; color: var(--text-tertiary); }
+.doc-header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.doc-header-right a {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  transition: all .2s;
+}
+.doc-header-right a:hover { color: var(--primary); background: var(--primary-bg); }
+.toc-toggle {
+  display: none;
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ========= Layout ========= */
+.doc-layout {
+  display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - var(--header-h));
+}
+
+/* ========= Sidebar ========= */
+.doc-sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  position: sticky;
+  top: var(--header-h);
+  height: calc(100vh - var(--header-h));
+  overflow-y: auto;
+  padding: 24px 0 32px;
+  background: var(--bg-container);
+  border-right: 1px solid var(--border-secondary);
+}
+.doc-sidebar::-webkit-scrollbar { width: 4px; }
+.doc-sidebar::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+
+.sidebar-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  padding: 0 20px;
+  margin-bottom: 12px;
+}
+.sidebar-nav { list-style: none; }
+.sidebar-nav li { margin: 0; }
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: all .15s;
+  line-height: 1.4;
+}
+.sidebar-link:hover { color: var(--text-primary); background: var(--bg-base); }
+.sidebar-link.active {
+  color: var(--primary);
+  border-left-color: var(--primary);
+  background: var(--primary-bg);
+  font-weight: 500;
+}
+.sidebar-link .dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+  flex-shrink: 0;
+  opacity: 0.4;
+}
+.sidebar-link.active .dot { background: var(--primary); opacity: 1; }
+
+.sidebar-sub {
+  list-style: none;
+  padding-left: 20px;
+}
+.sidebar-sub-link {
+  display: block;
+  padding: 5px 20px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: all .15s;
+  line-height: 1.3;
+}
+.sidebar-sub-link:hover { color: var(--text-secondary); }
+.sidebar-sub-link.active { color: var(--primary); border-left-color: var(--primary); }
+
+/* ========= Main Content ========= */
+.doc-content {
+  flex: 1;
+  min-width: 0;
+  padding: 40px 56px 80px;
+  background: var(--bg-container);
+}
+
+.doc-content h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 48px 0 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--bg-base);
+  line-height: 1.3;
+  scroll-margin-top: calc(var(--header-h) + 16px);
+}
+.doc-content h2:first-of-type { margin-top: 0; }
+
+.doc-content h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 28px 0 12px;
+  line-height: 1.4;
+}
+.doc-content h2 + h3 { margin-top: 16px; }
+
+.doc-content p {
+  margin: 12px 0;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.doc-content ul, .doc-content ol {
+  margin: 8px 0 16px 24px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.75;
+}
+.doc-content li { margin: 4px 0; }
+
+.doc-content strong { color: var(--text-primary); font-weight: 600; }
+
+/* ===== Anchor links ===== */
+.anchor-link {
+  float: left;
+  margin-left: -24px;
+  padding-right: 4px;
+  color: var(--border-color);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity .15s;
+  font-weight: 400;
+}
+h2:hover .anchor-link, h3:hover .anchor-link { opacity: 1; }
+.anchor-link:hover { color: var(--primary); }
+
+/* ===== Inline Code ===== */
+.doc-content code:not(pre code) {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-secondary);
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: #D4380D;
+}
+
+/* ===== Code Block ===== */
+.doc-content pre {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: #1A1A2E;
+  color: #E4E4F0;
+  border-radius: var(--radius-lg);
+  padding: 18px 22px;
+  overflow-x: auto;
+  margin: 14px 0;
+  line-height: 1.65;
+  position: relative;
+}
+.doc-content pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+.doc-content pre .hl-k { color: #C792EA; }
+.doc-content pre .hl-s { color: #C3E88D; }
+.doc-content pre .hl-v { color: #82AAFF; }
+.doc-content pre .hl-c { color: #546E7A; font-style: italic; }
+.doc-content pre .hl-num { color: #F78C6C; }
+
+/* ===== Tables ===== */
+.doc-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+}
+.doc-content th {
+  background: var(--bg-base);
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+.doc-content td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-secondary);
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.doc-content tr:hover td { background: var(--bg-base); }
+
+/* ===== Step Cards ===== */
+.steps { counter-reset: step-counter; margin: 16px 0; }
+.step-card {
+  position: relative;
+  padding: 14px 20px 14px 56px;
+  margin: 0 0 8px;
+  background: var(--bg-base);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-secondary);
+  transition: border-color .2s;
+}
+.step-card:hover { border-color: var(--primary-light); }
+.step-card::before {
+  counter-increment: step-counter;
+  content: counter(step-counter);
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.step-card p { margin: 0; font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+/* ===== Tag badges ===== */
+.tag {
+  display: inline-block;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+}
+.tag-required { background: #FFF7E6; color: #FA8C16; border: 1px solid #FFD591; }
+
+/* ===== Callout Boxes ===== */
+.callout {
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  margin: 16px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.callout-icon { flex-shrink: 0; font-size: 16px; line-height: 1.4; }
+.callout-content { flex: 1; }
+.callout-content strong { display: block; margin-bottom: 2px; font-size: 13px; }
+.callout-content p { margin: 0; font-size: 13px; line-height: 1.6; }
+.callout-note { background: var(--primary-bg); border: 1px solid var(--primary-light); }
+.callout-note .callout-content strong { color: var(--primary); }
+.callout-warning { background: var(--warning-bg); border: 1px solid var(--warning-border); }
+.callout-warning .callout-content strong { color: #D48806; }
+
+/* ===== Requirement Grid ===== */
+.req-table { margin: 16px 0; }
+.req-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-secondary);
+  font-size: 14px;
+}
+.req-row:first-child { border-top: 2px solid var(--border-color); background: var(--bg-base); font-weight: 600; color: var(--text-primary); }
+.req-label { width: 120px; flex-shrink: 0; color: var(--text-primary); font-weight: 500; }
+.req-value { color: var(--text-secondary); }
+
+/* ===== Config section ===== */
+.config-group { margin: 16px 0; }
+.config-group-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+/* ===== Production Checklist ===== */
+.checklist {
+  list-style: none;
+  margin: 12px 0 !important;
+  padding: 0 !important;
+}
+.checklist li {
+  padding: 10px 0 10px 32px;
+  position: relative;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  border-bottom: 1px solid var(--border-secondary);
+}
+.checklist li:last-child { border-bottom: none; }
+.checklist li::before {
+  content: '✓';
+  position: absolute;
+  left: 4px;
+  top: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--success);
+}
+.checklist li strong { color: var(--text-primary); }
+
+/* ===== 文件树 ===== */
+.file-tree {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  margin: 14px 0;
+  line-height: 1.8;
+  white-space: pre;
+  overflow-x: auto;
+  color: var(--text-secondary);
+}
+.file-tree .dir { color: var(--primary); }
+.file-tree .file { color: var(--text-secondary); }
+
+/* ===== Back to Top ===== */
+.back-to-top {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-container);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  font-size: 18px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: all .25s ease;
+  pointer-events: none;
+  z-index: 50;
+}
+.back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.back-to-top:hover { color: var(--primary); border-color: var(--primary-light); box-shadow: var(--shadow-lg); }
+
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 90; }
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px) { .doc-content { padding: 32px 32px 64px; } }
+
+@media (max-width: 768px) {
+  .doc-header { padding: 0 16px; }
+  .doc-header-label { display: none; }
+  .doc-header-right a { display: none; }
+  .toc-toggle { display: inline-flex; align-items: center; justify-content: center; }
+  .doc-sidebar {
+    position: fixed;
+    top: var(--header-h);
+    left: -280px;
+    width: 280px;
+    height: calc(100vh - var(--header-h));
+    z-index: 91;
+    transition: left .3s ease;
+    box-shadow: var(--shadow-lg);
+  }
+  .doc-sidebar.open { left: 0; }
+  .sidebar-overlay.show { display: block; }
+  .doc-content { padding: 24px 20px 64px; }
+  .doc-content h2 { font-size: 22px; }
+  .doc-content pre { font-size: 12px; padding: 14px 16px; }
+  .back-to-top { bottom: 20px; right: 20px; }
+  .file-tree { font-size: 12px; padding: 12px 14px; }
+}
+
+@media print {
+  .doc-header, .doc-sidebar, .back-to-top, .toc-toggle { display: none !important; }
+  .doc-layout { display: block; }
+  .doc-content { padding: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ======== Header ======== -->
+<header class="doc-header">
+  <a href="/" class="doc-header-logo">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <rect width="28" height="28" rx="6" fill="#1677FF"/>
+      <path d="M8 20V8h6l3 3h3v9H8z" fill="white" opacity=".95"/>
+      <path d="M11 12h6M11 15h6M11 18h4" stroke="#1677FF" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <span>文档托管平台</span>
+  </a>
+  <div class="doc-header-divider"></div>
+  <span class="doc-header-label">部署文档</span>
+  <div class="doc-header-right">
+    <a href="usage.html">使用文档</a>
+    <a href="/">返回平台</a>
+  </div>
+  <button class="toc-toggle" id="tocToggle" aria-label="切换目录">☰</button>
+</header>
+
+<!-- ======== Layout ======== -->
+<div class="doc-layout">
+
+  <!-- Sidebar -->
+  <aside class="doc-sidebar" id="sidebar">
+    <div class="sidebar-title">目录</div>
+    <ul class="sidebar-nav" id="toc">
+      <li><a href="#requirements" class="sidebar-link"><span class="dot"></span>环境要求</a></li>
+      <li><a href="#local" class="sidebar-link"><span class="dot"></span>快速部署</a>
+        <ul class="sidebar-sub">
+          <li><a href="#local-get-code" class="sidebar-sub-link">获取代码</a></li>
+          <li><a href="#local-config" class="sidebar-sub-link">创建配置文件</a></li>
+          <li><a href="#local-install" class="sidebar-sub-link">安装依赖</a></li>
+          <li><a href="#local-start" class="sidebar-sub-link">启动服务</a></li>
+        </ul>
+      </li>
+      <li><a href="#docker" class="sidebar-link"><span class="dot"></span>Docker 部署</a></li>
+      <li><a href="#feishu-config" class="sidebar-link"><span class="dot"></span>飞书应用配置</a></li>
+      <li><a href="#storage" class="sidebar-link"><span class="dot"></span>文件存储</a></li>
+      <li><a href="#config-ref" class="sidebar-link"><span class="dot"></span>配置项参考</a></li>
+      <li><a href="#production" class="sidebar-link"><span class="dot"></span>生产环境建议</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="doc-content">
+
+    <!-- ===== 环境要求 ===== -->
+    <h2 id="requirements">环境要求<a href="#requirements" class="anchor-link">#</a></h2>
+
+    <div class="req-table">
+      <div class="req-row"><span class="req-label">组件</span><span class="req-value">版本要求</span></div>
+      <div class="req-row"><span class="req-label">Python</span><span class="req-value">≥ 3.11</span></div>
+      <div class="req-row"><span class="req-label">SQLite</span><span class="req-value">内置（无需额外安装）</span></div>
+      <div class="req-row"><span class="req-label">操作系统</span><span class="req-value">Windows / Linux / macOS</span></div>
+    </div>
+
+    <!-- ===== 快速部署 ===== -->
+    <h2 id="local">快速部署（本地运行）<a href="#local" class="anchor-link">#</a></h2>
+
+    <h3 id="local-get-code">1. 获取代码<a href="#local-get-code" class="anchor-link">#</a></h3>
+    <pre><code><span class="hl-c"># 进入项目目录</span>
+cd <span class="hl-v">文档托管平台</span></code></pre>
+
+    <h3 id="local-config">2. 创建配置文件<a href="#local-config" class="anchor-link">#</a></h3>
+    <pre><code><span class="hl-c"># 复制环境变量模板</span>
+cp <span class="hl-v">.env.example</span> <span class="hl-k">.env</span></code></pre>
+    <p>编辑 <code>.env</code> 文件，填入飞书应用信息：</p>
+    <pre><code><span class="hl-c"># 从飞书开发者后台获取</span>
+<span class="hl-k">FEISHU_APP_ID</span>=cli_a1234567890
+<span class="hl-k">FEISHU_APP_SECRET</span>=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+<span class="hl-c"># OAuth 回调地址（需与飞书后台配置一致）</span>
+<span class="hl-k">FEISHU_OAUTH_REDIRECT_URI</span>=http://localhost:8000/api/auth/callback
+
+<span class="hl-c"># JWT 加密密钥（务必修改为随机字符串）</span>
+<span class="hl-k">JWT_SECRET</span>=your-random-secret-at-least-32-chars-long
+
+<span class="hl-c"># 可选：修改监听端口</span>
+<span class="hl-k">PORT</span>=8000</code></pre>
+
+    <h3 id="local-install">3. 安装依赖<a href="#local-install" class="anchor-link">#</a></h3>
+    <pre><code>pip <span class="hl-k">install</span> -r requirements.txt</code></pre>
+
+    <h3 id="local-start">4. 启动服务<a href="#local-start" class="anchor-link">#</a></h3>
+    <pre><code>uvicorn <span class="hl-v">app.main:app</span> --host <span class="hl-num">0.0.0.0</span> --port <span class="hl-num">8000</span> --reload</code></pre>
+    <p>访问 <strong>http://localhost:8000</strong> 即可打开平台。</p>
+
+    <!-- ===== Docker 部署 ===== -->
+    <h2 id="docker">Docker 部署<a href="#docker" class="anchor-link">#</a></h2>
+
+    <h3>1. 创建配置文件</h3>
+    <pre><code>cp .env.example .env
+<span class="hl-c"># 编辑 .env 填入飞书应用信息（同上）</span></code></pre>
+
+    <h3>2. 构建并启动</h3>
+    <pre><code>docker-compose -f docker/docker-compose.yml up -d</code></pre>
+    <p>首次启动会自动构建镜像，之后访问 <strong>http://localhost:80</strong>。</p>
+
+    <h3>3. 查看日志</h3>
+    <pre><code>docker-compose -f docker/docker-compose.yml logs -f</code></pre>
+
+    <h3>4. 停止服务</h3>
+    <pre><code>docker-compose -f docker/docker-compose.yml down</code></pre>
+
+    <!-- ===== 飞书应用配置 ===== -->
+    <h2 id="feishu-config">飞书应用配置<a href="#feishu-config" class="anchor-link">#</a></h2>
+
+    <h3>创建飞书应用</h3>
+    <ol>
+      <li>登录 <a href="https://open.feishu.cn/app" target="_blank" style="color:var(--primary)">飞书开发者后台</a></li>
+      <li>创建企业自建应用</li>
+      <li>获取 <strong>App ID</strong> 和 <strong>App Secret</strong>，填入 <code>.env</code></li>
+    </ol>
+
+    <h3>配置 OAuth 2.0</h3>
+    <p>在飞书应用后台 → 安全设置 → <strong>OAuth 2.0 重定向 URI</strong>：</p>
+    <pre><code>http://<span class="hl-v">{你的域名或IP}</span>:<span class="hl-num">{端口}</span>/api/auth/callback</code></pre>
+    <p>示例：<code>http://localhost:8000/api/auth/callback</code></p>
+
+    <h3>配置权限</h3>
+    <p>在飞书应用后台 → 权限管理，开启以下权限：</p>
+    <table>
+      <tr><th>权限</th><th>用途</th></tr>
+      <tr><td><code>contact:user.base:readonly</code></td><td>读取用户基本信息</td></tr>
+      <tr><td><code>im:message</code></td><td>发送消息（L4 审批通知）</td></tr>
+      <tr><td><code>im:message:send_as_bot</code></td><td>以机器人身份发送消息</td></tr>
+    </table>
+
+    <div class="callout callout-note">
+      <div class="callout-icon">ℹ</div>
+      <div class="callout-content">
+        <strong>提示</strong>
+        <p>权限配置后需要发布应用并经过管理员审批方可生效。</p>
+      </div>
+    </div>
+
+    <h3>配置 Webhook</h3>
+    <p>在飞书应用后台 → 事件与回调 → <strong>请求网址</strong>：</p>
+    <pre><code>http://<span class="hl-v">{你的域名或IP}</span>:<span class="hl-num">{端口}</span>/api/feishu/webhook/card-action</code></pre>
+
+    <div class="callout callout-warning">
+      <div class="callout-icon">⚠</div>
+      <div class="callout-content">
+        <strong>注意</strong>
+        <p>本地开发时 Webhook 需要公网可达。可使用 ngrok 进行内网穿透：<br><code style="background:rgba(0,0,0,.06);padding:2px 8px;border-radius:4px;font-size:13px">ngrok http 8000</code></p>
+      </div>
+    </div>
+
+    <!-- ===== 文件存储 ===== -->
+    <h2 id="storage">文件存储<a href="#storage" class="anchor-link">#</a></h2>
+    <p>上传的文件默认保存在项目根目录的 <code>uploads/</code> 文件夹中：</p>
+
+    <div class="file-tree"><span class="dir">uploads/</span>
+  <span class="dir">{project_id}/</span>
+    <span class="dir">files/</span>
+      index.html
+      <span class="dir">css/</span>
+        style.css
+      <span class="dir">images/</span>
+        logo.png</div>
+
+    <p>数据库文件位于 <code>data/app.db</code>。建议定期备份 <code>data/</code> 和 <code>uploads/</code> 目录。</p>
+
+    <!-- ===== 配置项参考 ===== -->
+    <h2 id="config-ref">完整配置项<a href="#config-ref" class="anchor-link">#</a></h2>
+
+    <table>
+      <tr><th>配置项</th><th>必填</th><th>默认值</th><th>说明</th></tr>
+      <tr><td><code>HOST</code></td><td>否</td><td><code>0.0.0.0</code></td><td>监听地址</td></tr>
+      <tr><td><code>PORT</code></td><td>否</td><td><code>8000</code></td><td>监听端口</td></tr>
+      <tr><td><code>DEBUG</code></td><td>否</td><td><code>true</code></td><td>调试模式</td></tr>
+      <tr><td><code>FEISHU_APP_ID</code></td><td><span class="tag tag-required">必填</span></td><td>-</td><td>飞书 App ID</td></tr>
+      <tr><td><code>FEISHU_APP_SECRET</code></td><td><span class="tag tag-required">必填</span></td><td>-</td><td>飞书 App Secret</td></tr>
+      <tr><td><code>FEISHU_OAUTH_REDIRECT_URI</code></td><td><span class="tag tag-required">必填</span></td><td>-</td><td>OAuth 回调地址</td></tr>
+      <tr><td><code>JWT_SECRET</code></td><td><span class="tag tag-required">必填</span></td><td>-</td><td>JWT 加密密钥</td></tr>
+      <tr><td><code>JWT_EXPIRY_HOURS</code></td><td>否</td><td><code>168</code></td><td>会话有效期（小时）</td></tr>
+      <tr><td><code>DATABASE_URL</code></td><td>否</td><td><code>sqlite+aiosqlite:///data/app.db</code></td><td>数据库地址</td></tr>
+      <tr><td><code>UPLOAD_DIR</code></td><td>否</td><td><code>./uploads</code></td><td>上传目录</td></tr>
+      <tr><td><code>MAX_UPLOAD_SIZE_MB</code></td><td>否</td><td><code>100</code></td><td>上传大小限制</td></tr>
+    </table>
+
+    <!-- ===== 生产环境建议 ===== -->
+    <h2 id="production">生产环境建议<a href="#production" class="anchor-link">#</a></h2>
+
+    <p>以下建议帮助你在生产环境中安全、稳定地运行平台：</p>
+
+    <ul class="checklist">
+      <li><strong>修改 JWT_SECRET</strong> — 使用足够长的随机字符串，不要使用默认值</li>
+      <li><strong>关闭 DEBUG</strong> — 设置 <code>DEBUG=false</code>，避免泄露调试信息</li>
+      <li><strong>反向代理</strong> — 建议使用 Nginx 反向代理，配置 SSL 证书启用 HTTPS</li>
+      <li><strong>定期备份</strong> — 定时备份 <code>data/</code> 和 <code>uploads/</code> 目录</li>
+      <li><strong>目录列表</strong> — 敏感项目关闭"允许目录列表"，防止文件被遍历扫描</li>
+      <li><strong>防火墙</strong> — 限制非必要端口的对外暴露</li>
+    </ul>
+
+  </main>
+</div>
+
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* Scroll Spy */
+  const headings = document.querySelectorAll('.doc-content h2[id], .doc-content h3[id]');
+  const sidebarLinks = document.querySelectorAll('.sidebar-link, .sidebar-sub-link');
+
+  function updateActiveSidebar() {
+    const scrollY = window.scrollY + 90;
+    let activeId = null;
+    for (const h of headings) {
+      if (h.offsetTop <= scrollY) activeId = h.id;
+    }
+    sidebarLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + activeId);
+    });
+  }
+
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => { updateActiveSidebar(); ticking = false; });
+      ticking = true;
+    }
+  });
+  updateActiveSidebar();
+
+  /* Back to Top */
+  const backBtn = document.getElementById('backToTop');
+  window.addEventListener('scroll', () => {
+    backBtn.classList.toggle('visible', window.scrollY > 400);
+  });
+  backBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  /* Mobile TOC */
+  const tocToggle = document.getElementById('tocToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('show'); }
+
+  tocToggle.addEventListener('click', () => {
+    sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+  });
+  overlay.addEventListener('click', closeSidebar);
+
+  sidebarLinks.forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && sidebar.classList.contains('open')) closeSidebar();
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}创建项目 - 文档托管平台{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">创建项目</h1>
+        <p class="page-subtitle">创建一个新的文档项目</p>
+    </div>
+</div>
+
+<div class="card" style="max-width:640px;">
+    <div class="card-body">
+        <form id="createProjectForm" onsubmit="return onSubmit(event)">
+            <div class="form-group">
+                <label class="form-label">项目名称 <span class="required">*</span></label>
+                <input type="text" class="form-input" id="name" required maxlength="256" placeholder="输入项目名称">
+            </div>
+            <div class="form-group">
+                <label class="form-label">项目描述</label>
+                <textarea class="form-textarea" id="description" placeholder="可选，简单描述项目内容" maxlength="2000"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">可见路径 <span class="required">*</span></label>
+                <input type="text" class="form-input" id="visiblePath" required pattern="[a-z0-9_\-/]+" placeholder="如: engineering-docs">
+                <div class="form-hint" id="visiblePathHint">用于 URL 访问的唯一路径标识，仅支持小写字母、数字、短横线和下划线</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">安全等级 <span class="required">*</span></label>
+                <select class="form-select" id="securityLevel">
+                    <option value="1">L1 - 完全公开，无需登录</option>
+                    <option value="2">L2 - 公开，无需登录</option>
+                    <option value="3">L3 - 需飞书登录后访问</option>
+                    <option value="4" selected>L4 - 需飞书登录并申请审批</option>
+                </select>
+                <div class="form-hint">L1/L2 所有人都可直接访问；L3 需飞书登录；L4 需登录后提交访问申请</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">访问密码（可选）</label>
+                <input type="text" class="form-input" id="password" placeholder="设置额外密码保护，留空则不设置" minlength="4">
+                <div class="form-hint">设置密码后，所有访问者需要输入密码才能查看项目内容</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">
+                    <input type="checkbox" id="allowListing" checked>
+                    允许目录列表
+                </label>
+                <div class="form-hint">关闭后，访问目录时不会显示文件列表（仅可访问已知路径的文件），可防止文件被遍历扫描</div>
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">创建项目</button>
+                <a href="/my-projects" class="btn btn-ghost btn-lg">取消</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+async function onSubmit(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '创建中...';
+
+    try {
+        const data = await API.post('/api/projects', {
+            name: document.getElementById('name').value.trim(),
+            description: document.getElementById('description').value.trim() || null,
+            visible_path: document.getElementById('visiblePath').value.trim(),
+            security_level: parseInt(document.getElementById('securityLevel').value),
+            password: document.getElementById('password').value || null,
+            allow_listing: document.getElementById('allowListing').checked,
+        });
+        showToast('项目创建成功', 'success');
+        window.location.href = '/my-projects';
+    } catch (err) {
+        var msg = err.message || '创建失败';
+        // Show path-unique error inline on the visiblePath field
+        if (msg.indexOf('可见路径') !== -1) {
+            var input = document.getElementById('visiblePath');
+            var hint = document.getElementById('visiblePathHint');
+            input.style.borderColor = 'var(--error)';
+            hint.textContent = msg;
+            hint.style.color = 'var(--error)';
+            input.focus();
+        } else {
+            showToast(msg, 'error');
+        }
+        btn.disabled = false;
+        btn.textContent = '创建项目';
+    }
+    return false;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}文件管理 - 文档托管平台{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">文件管理</h1>
+        <p class="page-subtitle" id="projectInfo">项目 #{{ project_id }}</p>
+    </div>
+    <a href="/my-projects" class="btn btn-ghost">返回</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div id="fileManagerContent">
+            <div class="loading-spinner" style="margin:24px auto;"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="/static/js/url_rename.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!(await requireAuth())) return;
+    loadUrlRenames({{ project_id }});
+});
+</script>
+{% endblock %}

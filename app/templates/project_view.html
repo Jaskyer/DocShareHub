@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ project_name }} - 文档托管平台{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+    <a href="/">首页</a>
+    <span class="separator">/</span>
+    <a href="/{{ visible_path }}">{{ project_name }}</a>
+    {% for crumb in breadcrumbs %}
+    <span class="separator">/</span>
+    {% if not crumb.is_last %}
+    <a href="{{ crumb.path }}">{{ crumb.name }}</a>
+    {% else %}
+    <span class="current">{{ crumb.name }}</span>
+    {% endif %}
+    {% endfor %}
+</nav>
+
+{% if user %}
+<div style="margin-bottom:var(--spacing-md);display:flex;gap:var(--spacing-sm);align-items:center;">
+    <span style="font-size:var(--font-size-sm);color:var(--text-tertiary);">
+        安全等级: <span class="tag tag-l{{ project.security_level }}">L{{ project.security_level }}</span>
+    </span>
+</div>
+{% endif %}
+
+<div class="dir-listing">
+    {% if items %}
+    {% for item in items %}
+    <a href="{% if item.is_renamed %}/{{ visible_path }}/{{ item.display_name }}{% else %}/{{ visible_path }}{% if current_path %}/{{ current_path }}{% endif %}/{{ item.name }}{% endif %}" class="dir-item">
+        <span class="dir-item-icon">
+            {% if item.is_directory %}
+            📁
+            {% else %}
+            {% set ext = item.name.split('.')[-1]|lower %}
+            {% if ext in ['html', 'htm'] %}🌐
+            {% elif ext in ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'] %}🖼️
+            {% elif ext in ['pdf'] %}📕
+            {% elif ext in ['css'] %}🎨
+            {% elif ext in ['js'] %}⚙️
+            {% elif ext in ['md'] %}📝
+            {% else %}📄
+            {% endif %}
+            {% endif %}
+        </span>
+        <span class="dir-item-info">
+            <span class="dir-item-name">{{ item.display_name }}</span>
+            {% if item.description %}<span class="dir-item-desc">{{ item.description }}</span>{% endif %}
+        </span>
+        {% if item.is_renamed %}<span class="dir-item-rename-badge" title="原文件: {{ item.name }}">重命名</span>{% endif %}
+        <span class="dir-item-size">{% if not item.is_directory %}{{ item.size_str }}{% endif %}</span>
+        <span class="dir-item-time">{{ item.modified_str }}</span>
+    </a>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state" style="padding:48px;">
+        <div class="empty-state-icon">📂</div>
+        <div class="empty-state-title">此目录为空</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

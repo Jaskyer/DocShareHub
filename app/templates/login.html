@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}登录 - 文档托管平台{% endblock %}
+{% block content %}
+<div style="max-width:400px;margin:80px auto;">
+    <div class="card">
+        <div class="card-body" style="text-align:center;padding:40px;">
+            <h2 style="margin-bottom:8px;">登录文档托管平台</h2>
+            <p style="color:var(--text-secondary);font-size:var(--font-size-sm);margin-bottom:32px;">
+                使用飞书账号登录后即可管理你的项目
+            </p>
+            <a href="/api/auth/login" class="btn btn-primary btn-lg" style="width:100%;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="margin-right:4px;">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="currentColor" opacity="0.2"/>
+                    <path d="M5 13l4 4 9-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                飞书登录
+            </a>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    var params = new URLSearchParams(window.location.search);
+    var next = params.get('next');
+    if (next) {
+        var btn = document.querySelector('.btn-primary.btn-lg');
+        if (btn) btn.href = '/api/auth/login?next=' + encodeURIComponent(next);
+    }
+})();
+</script>
+{% endblock %}

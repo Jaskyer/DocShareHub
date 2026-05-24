@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}无权限 - 文档托管平台{% endblock %}
+{% block content %}
+<div class="no-permission-container">
+    <div class="card">
+        <div class="card-body" style="text-align:center;padding:48px;">
+            <div style="font-size:64px;margin-bottom:16px;opacity:0.6;">🔒</div>
+            <h2 style="margin-bottom:8px;">无法访问此项目</h2>
+            <p style="color:var(--text-secondary);font-size:var(--font-size-sm);margin-bottom:24px;">
+                {% if message %}
+                {{ message }}
+                {% else %}
+                此项目需要申请访问权限，请点击下方按钮提交访问申请。
+                {% endif %}
+            </p>
+            <div id="accessRequestArea">
+                {% if show_request_form %}
+                <div class="form-group" style="text-align:left;">
+                    <label class="form-label">申请理由（可选）</label>
+                    <textarea class="form-textarea" id="requestReason" placeholder="简单说明你的访问目的..." maxlength="500"></textarea>
+                </div>
+                <button class="btn btn-primary btn-lg" onclick="submitAccessRequest()">提交访问申请</button>
+                {% elif request_status == 'pending' %}
+                <div class="tag tag-pending" style="font-size:var(--font-size-md);padding:8px 16px;">访问申请已提交，等待审核中...</div>
+                {% elif request_status == 'approved' %}
+                <div class="tag tag-approved" style="font-size:var(--font-size-md);padding:8px 16px;">访问已获批，<a href="{{ project_url }}">点击查看</a></div>
+                {% else %}
+                <a href="/login" class="btn btn-primary btn-lg">登录后申请访问</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+async function submitAccessRequest() {
+    const reason = document.getElementById('requestReason')?.value?.trim() || '';
+    try {
+        await API.post('/api/projects/{{ project_id }}/access-requests', { reason });
+        showToast('访问申请已提交', 'success');
+        document.getElementById('accessRequestArea').innerHTML = '<div class="tag tag-pending" style="font-size:var(--font-size-md);padding:8px 16px;">访问申请已提交，等待审核中...</div>';
+    } catch (err) {
+        showToast(err.message || '提交失败', 'error');
+    }
+}
+</script>
+{% endblock %}

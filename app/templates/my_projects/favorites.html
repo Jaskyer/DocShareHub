@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}我的收藏 - 文档托管平台{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">我的收藏</h1>
+        <p class="page-subtitle">收藏的文件和目录</p>
+    </div>
+</div>
+
+<div id="favoritesContent">
+    <div class="loading-spinner" style="margin:48px auto;"></div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+async function loadFavorites() {
+    try {
+        if (!(await requireAuth())) return;
+        const data = await API.get('/api/favorites');
+        const container = document.getElementById('favoritesContent');
+        if (data.favorites && data.favorites.length > 0) {
+            let html = '<div class="card-grid">';
+            for (const f of data.favorites) {
+                const path = '/' + escapeHtml(f.project_visible_path || '') + (f.document_path ? '/' + escapeHtml(f.document_path) : '');
+                html += `
+                    <div class="project-card">
+                        <div class="project-card-title">
+                            ${f.document_name ? escapeHtml(f.document_name) : escapeHtml(f.project_name || '')}
+                        </div>
+                        <div class="project-card-path">${escapeHtml(path)}</div>
+                        <div class="project-card-meta">
+                            <span class="tag" style="background:var(--primary-bg);color:var(--primary);">${escapeHtml(f.project_name || '')}</span>
+                        </div>
+                        <div class="project-card-actions">
+                            <a href="${escapeHtml(path)}" class="btn btn-sm btn-outline">查看</a>
+                            <button class="btn btn-sm btn-ghost" onclick="removeFavorite(${f.id})">取消收藏</button>
+                        </div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">⭐</div>
+                    <div class="empty-state-title">还没有收藏</div>
+                    <div class="empty-state-desc">浏览项目时点击星标即可收藏文件或目录</div>
+                </div>
+            `;
+        }
+    } catch (err) {
+        document.getElementById('favoritesContent').innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">⚠️</div>
+                <div class="empty-state-title">加载失败</div>
+                <div class="empty-state-desc">${escapeHtml(err.message || '无法加载收藏列表')}</div>
+            </div>
+        `;
+    }
+}
+
+async function removeFavorite(id) {
+    try {
+        await API.delete('/api/favorites/' + id);
+        showToast('已取消收藏', 'info');
+        loadFavorites();
+    } catch (err) {
+        showToast(err.message || '操作失败', 'error');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadFavorites);
+</script>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}我的项目 - 文档托管平台{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">我的项目</h1>
+        <p class="page-subtitle">管理和查看你创建的所有文档项目</p>
+    </div>
+    <a href="/my-projects/create" class="btn btn-primary">+ 创建项目</a>
+</div>
+
+<div id="projectList">
+    <div class="loading-spinner" style="margin:48px auto;"></div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+async function loadProjects() {
+    try {
+        if (!(await requireAuth())) return;
+        const data = await API.get('/api/projects');
+        const container = document.getElementById('projectList');
+        if (data.projects && data.projects.length > 0) {
+            let html = '<div class="card-grid">';
+            for (const p of data.projects) {
+                const levelLabel = 'L' + p.security_level;
+                const hasFiles = (p.document_count || 0) > 0;
+                const viewLink = hasFiles
+                    ? `<a href="/${escapeHtml(p.visible_path)}" class="btn btn-sm btn-ghost" target="_blank">查看</a>`
+                    : `<button class="btn btn-sm btn-ghost" onclick="showAlert('该项目暂未上传文件', '提示')">查看</button>`;
+                html += `
+                    <div class="project-card">
+                        <div class="project-card-title">${escapeHtml(p.name)}</div>
+                        <div class="project-card-path">/${escapeHtml(p.visible_path)}</div>
+                        ${p.description ? `<div class="project-card-desc">${escapeHtml(p.description)}</div>` : ''}
+                        <div class="project-card-meta">
+                            <span class="tag tag-l${p.security_level}">${levelLabel}</span>
+                            <span class="tag" style="background:var(--bg-base);color:var(--text-tertiary);border:1px solid var(--border-color);">${p.document_count || 0} 文档</span>
+                        </div>
+                        <div class="project-card-actions">
+                            <a href="/my-projects/${p.id}/upload" class="btn btn-sm btn-outline">上传</a>
+                            <a href="/my-projects/${p.id}/url-rename" class="btn btn-sm btn-ghost">文件管理</a>
+                            <a href="/my-projects/${p.id}/edit" class="btn btn-sm btn-ghost">编辑</a>
+                            ${p.security_level >= 4 ? `<a href="/my-projects/${p.id}/access-requests" class="btn btn-sm btn-ghost">审批</a>` : ''}
+                            ${viewLink}
+                            <button class="btn btn-sm btn-danger" onclick="deleteProject(${p.id}, '${escapeHtml(p.name)}')">删除</button>
+                        </div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📁</div>
+                    <div class="empty-state-title">还没有项目</div>
+                    <div class="empty-state-desc">创建你的第一个文档项目吧</div>
+                    <a href="/my-projects/create" class="btn btn-primary">创建项目</a>
+                </div>
+            `;
+        }
+    } catch (err) {
+        document.getElementById('projectList').innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">⚠️</div>
+                <div class="empty-state-title">加载失败</div>
+                <div class="empty-state-desc">${escapeHtml(err.message || '无法加载项目列表')}</div>
+            </div>
+        `;
+    }
+}
+
+async function deleteProject(id, name) {
+    const ok = await showConfirm('确定要删除项目 "' + name + '" 吗？所有上传的文档也会被删除。', '删除项目');
+    if (!ok) return;
+    try {
+        await API.delete('/api/projects/' + id);
+        showToast('项目已删除', 'success');
+        loadProjects();
+    } catch (err) {
+        showToast(err.message || '删除失败', 'error');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadProjects);
+</script>
+{% endblock %}

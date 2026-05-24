@@ -1,0 +1,68 @@
+:root {
+    /* Primary Colors */
+    --primary: #1677FF;
+    --primary-hover: #4096FF;
+    --primary-active: #0958D9;
+    --primary-bg: #E6F4FF;
+
+    /* Neutral Colors */
+    --text-primary: #1F1F1F;
+    --text-secondary: #5C5C5C;
+    --text-tertiary: #8C8C8C;
+    --text-placeholder: #BFBFBF;
+    --text-white: #FFFFFF;
+
+    /* Background Colors */
+    --bg-base: #F5F5F5;
+    --bg-container: #FFFFFF;
+    --bg-elevated: #FFFFFF;
+    --bg-layout: #F0F2F5;
+
+    /* Border Colors */
+    --border-color: #E8E8E8;
+    --border-secondary: #F0F0F0;
+
+    /* Status Colors */
+    --success: #52C41A;
+    --success-bg: #F6FFED;
+    --warning: #FAAD14;
+    --warning-bg: #FFFBE6;
+    --error: #FF4D4F;
+    --error-bg: #FFF2F0;
+    --info: #1677FF;
+    --info-bg: #E6F4FF;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+    --shadow-md: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 6px 16px -8px rgba(0, 0, 0, 0.08), 0 9px 28px 0 rgba(0, 0, 0, 0.05), 0 12px 48px 16px rgba(0, 0, 0, 0.03);
+
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+
+    /* Font */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+    --font-size-xs: 12px;
+    --font-size-sm: 13px;
+    --font-size-md: 14px;
+    --font-size-lg: 16px;
+    --font-size-xl: 20px;
+    --font-size-2xl: 24px;
+    --font-size-3xl: 30px;
+
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 24px;
+    --spacing-2xl: 32px;
+    --spacing-3xl: 48px;
+
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.25s ease;
+}

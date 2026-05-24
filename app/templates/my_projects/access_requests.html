@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}访问审批 - 文档托管平台{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">访问审批</h1>
+        <p class="page-subtitle" id="projectInfo">项目 #{{ project_id }}</p>
+    </div>
+    <a href="/my-projects" class="btn btn-ghost">返回</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div style="display:flex;gap:var(--spacing-sm);margin-bottom:var(--spacing-lg);">
+            <button class="btn btn-primary btn-sm" onclick="loadRequests('pending')" id="tabPending">待处理</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadRequests('approved')" id="tabApproved">已批准</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadRequests('rejected')" id="tabRejected">已拒绝</button>
+        </div>
+        <div id="requestsContent">
+            <div class="empty-state">
+                <div class="empty-state-title">加载中...</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+let currentTab = 'pending';
+
+async function loadRequests(status) {
+    currentTab = status || 'pending';
+    // Update tabs
+    ['pending', 'approved', 'rejected'].forEach(t => {
+        const btn = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+        btn.className = t === currentTab ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
+    });
+
+    try {
+        const data = await API.get('/api/projects/{{ project_id }}/access-requests', { status: currentTab });
+        const container = document.getElementById('requestsContent');
+
+        if (data.requests && data.requests.length > 0) {
+            let html = '<div class="table-container"><table><thead><tr><th>申请人</th><th>申请时间</th><th>备注</th><th>操作</th></tr></thead><tbody>';
+            for (const r of data.requests) {
+                html += `
+                    <tr>
+                        <td>${escapeHtml(r.requester_name || 'Unknown')}</td>
+                        <td>${formatDate(r.created_at)}</td>
+                        <td>${escapeHtml(r.reason || '-')}</td>
+                        <td>
+                            ${currentTab === 'pending' ? `
+                                <button class="btn btn-sm btn-success" onclick="processRequest(${r.id}, 'approve')">同意</button>
+                                <button class="btn btn-sm btn-danger" onclick="processRequest(${r.id}, 'reject')">拒绝</button>
+                            ` : `<span class="tag tag-${r.status}">${r.status === 'approved' ? '已批准' : '已拒绝'}</span>`}
+                        </td>
+                    </tr>
+                `;
+            }
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-title">${currentTab === 'pending' ? '没有待处理的申请' : currentTab === 'approved' ? '没有已批准的申请' : '没有已拒绝的申请'}</div>
+                </div>
+            `;
+        }
+    } catch (err) {
+        document.getElementById('requestsContent').innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">⚠️</div>
+                <div class="empty-state-title">加载失败</div>
+                <div class="empty-state-desc">${escapeHtml(err.message || '加载失败')}</div>
+            </div>
+        `;
+    }
+}
+
+async function processRequest(requestId, action) {
+    try {
+        const actionText = action === 'approve' ? '同意' : '拒绝';
+        const ok = await showConfirm(`确定${actionText}该访问申请吗？`, '确认操作');
+        if (!ok) return;
+
+        const endpoint = `/api/projects/{{ project_id }}/access-requests/${requestId}/${action}`;
+        await API.post(endpoint);
+        showToast(`已${actionText}访问申请`, 'success');
+        loadRequests(currentTab);
+    } catch (err) {
+        showToast(err.message || '操作失败', 'error');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!(await requireAuth())) return;
+    loadRequests('pending');
+});
+</script>
+{% endblock %}

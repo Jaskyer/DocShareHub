@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>使用文档 — 文档托管平台</title>
+<style>
+:root {
+  --primary: #1677FF;
+  --primary-hover: #4096FF;
+  --primary-active: #0958D9;
+  --primary-bg: #E6F4FF;
+  --primary-light: #BAE0FF;
+  --text-primary: #1F1F1F;
+  --text-secondary: #5C5C5C;
+  --text-tertiary: #8C8C8C;
+  --text-placeholder: #BFBFBF;
+  --bg-base: #F5F5F5;
+  --bg-container: #FFFFFF;
+  --bg-elevated: #FFFFFF;
+  --bg-layout: #F0F2F5;
+  --border-color: #E8E8E8;
+  --border-secondary: #F0F0F0;
+  --success: #52C41A;
+  --success-bg: #F6FFED;
+  --success-border: #B7EB8F;
+  --warning: #FAAD14;
+  --warning-bg: #FFFBE6;
+  --warning-border: #FFE58F;
+  --error: #FF4D4F;
+  --error-bg: #FFF2F0;
+  --error-border: #FFCCC7;
+  --info: #1677FF;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02);
+  --shadow-md: 0 3px 6px -4px rgba(0,0,0,0.12), 0 6px 16px rgba(0,0,0,0.08), 0 9px 28px rgba(0,0,0,0.05);
+  --shadow-lg: 0 6px 16px -8px rgba(0,0,0,0.08), 0 9px 28px rgba(0,0,0,0.05), 0 12px 48px rgba(0,0,0,0.03);
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans SC', sans-serif;
+  --mono: 'SF Mono', Monaco, 'Cascadia Code', 'Consolas', 'Noto Sans Mono', monospace;
+  --sidebar-w: 240px;
+  --header-h: 60px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-h) + 16px);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-family);
+  color: var(--text-primary);
+  background: var(--bg-layout);
+  line-height: 1.7;
+}
+
+/* ========= Header ========= */
+.doc-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--header-h);
+  background: var(--bg-container);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  gap: 16px;
+}
+.doc-header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.doc-header-logo svg { flex-shrink: 0; }
+.doc-header-logo span { white-space: nowrap; }
+.doc-header-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border-color);
+}
+.doc-header-label {
+  font-size: 14px;
+  color: var(--text-tertiary);
+}
+.doc-header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.doc-header-right a {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  transition: all .2s;
+}
+.doc-header-right a:hover {
+  color: var(--primary);
+  background: var(--primary-bg);
+}
+
+/* ========= TOC Toggle (mobile) ========= */
+.toc-toggle {
+  display: none;
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ========= Layout ========= */
+.doc-layout {
+  display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - var(--header-h));
+}
+
+/* ========= Sidebar ========= */
+.doc-sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  position: sticky;
+  top: var(--header-h);
+  height: calc(100vh - var(--header-h));
+  overflow-y: auto;
+  padding: 24px 0 32px;
+  background: var(--bg-container);
+  border-right: 1px solid var(--border-secondary);
+}
+.doc-sidebar::-webkit-scrollbar { width: 4px; }
+.doc-sidebar::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+
+.sidebar-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  padding: 0 20px;
+  margin-bottom: 12px;
+}
+
+.sidebar-nav { list-style: none; }
+
+.sidebar-nav li { margin: 0; }
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: all .15s;
+  line-height: 1.4;
+}
+.sidebar-link:hover { color: var(--text-primary); background: var(--bg-base); }
+.sidebar-link.active {
+  color: var(--primary);
+  border-left-color: var(--primary);
+  background: var(--primary-bg);
+  font-weight: 500;
+}
+
+.sidebar-link .dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+  flex-shrink: 0;
+  opacity: 0.4;
+}
+.sidebar-link.active .dot { background: var(--primary); opacity: 1; }
+
+.sidebar-sub {
+  list-style: none;
+  padding-left: 20px;
+}
+.sidebar-sub-link {
+  display: block;
+  padding: 5px 20px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: all .15s;
+  line-height: 1.3;
+}
+.sidebar-sub-link:hover { color: var(--text-secondary); }
+.sidebar-sub-link.active { color: var(--primary); border-left-color: var(--primary); }
+
+/* ========= Main Content ========= */
+.doc-content {
+  flex: 1;
+  min-width: 0;
+  padding: 40px 56px 80px;
+  background: var(--bg-container);
+}
+
+.doc-content h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 48px 0 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--bg-base);
+  line-height: 1.3;
+  scroll-margin-top: calc(var(--header-h) + 16px);
+}
+.doc-content h2:first-of-type { margin-top: 0; }
+
+.doc-content h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 28px 0 12px;
+  line-height: 1.4;
+}
+.doc-content h2 + h3 { margin-top: 16px; }
+
+.doc-content h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 20px 0 8px;
+}
+
+.doc-content p {
+  margin: 12px 0;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.doc-content ul, .doc-content ol {
+  margin: 8px 0 16px 24px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.75;
+}
+.doc-content li { margin: 4px 0; }
+
+.doc-content strong { color: var(--text-primary); font-weight: 600; }
+
+/* ===== Anchor links ===== */
+.anchor-link {
+  float: left;
+  margin-left: -24px;
+  padding-right: 4px;
+  color: var(--border-color);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity .15s;
+  font-weight: 400;
+}
+h2:hover .anchor-link,
+h3:hover .anchor-link { opacity: 1; }
+.anchor-link:hover { color: var(--primary); }
+
+/* ===== Inline Code ===== */
+.doc-content code:not(pre code) {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-secondary);
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: #D4380D;
+}
+
+/* ===== Code Block ===== */
+.doc-content pre {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: #1A1A2E;
+  color: #E4E4F0;
+  border-radius: var(--radius-lg);
+  padding: 18px 22px;
+  overflow-x: auto;
+  margin: 14px 0;
+  line-height: 1.65;
+  position: relative;
+}
+.doc-content pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+.doc-content pre .url-highlight { color: #7CB8FF; }
+.doc-content pre .string-highlight { color: #A5D6A7; }
+.doc-content pre .comment-highlight { color: #78909C; font-style: italic; }
+
+/* ===== Tables ===== */
+.doc-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+}
+.doc-content th {
+  background: var(--bg-base);
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+.doc-content td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-secondary);
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.doc-content tr:hover td { background: var(--bg-base); }
+
+/* ===== Step Cards ===== */
+.steps { counter-reset: step-counter; margin: 16px 0; }
+
+.step-card {
+  position: relative;
+  padding: 14px 20px 14px 56px;
+  margin: 0 0 8px;
+  background: var(--bg-base);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-secondary);
+  transition: border-color .2s;
+}
+.step-card:hover { border-color: var(--primary-light); }
+
+.step-card::before {
+  counter-increment: step-counter;
+  content: counter(step-counter);
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.step-card p { margin: 0; font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+/* ===== Security Level Grid ===== */
+.level-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 0;
+}
+.level-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transition: box-shadow .2s, border-color .2s;
+}
+.level-card:hover { box-shadow: var(--shadow-sm); border-color: var(--border-color); }
+
+.level-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.level-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 24px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.tag-l1 { background: #F6FFED; color: #52C41A; border: 1px solid #B7EB8F; }
+.tag-l2 { background: #E6F7FF; color: #1677FF; border: 1px solid #91CAFF; }
+.tag-l3 { background: #FFF7E6; color: #FA8C16; border: 1px solid #FFD591; }
+.tag-l4 { background: #FFF2F0; color: #FF4D4F; border: 1px solid #FFCCC7; }
+
+.level-card h4 { font-size: 14px; font-weight: 600; color: var(--text-primary); margin: 0; }
+.level-card p { margin: 0; font-size: 13px; color: var(--text-tertiary); line-height: 1.6; }
+
+/* ===== Callout Boxes ===== */
+.callout {
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  margin: 16px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.callout-icon { flex-shrink: 0; font-size: 16px; line-height: 1.4; }
+.callout-content { flex: 1; }
+.callout-content strong { display: block; margin-bottom: 2px; font-size: 13px; }
+.callout-content p { margin: 0; font-size: 13px; line-height: 1.6; }
+
+.callout-note {
+  background: var(--primary-bg);
+  border: 1px solid var(--primary-light);
+}
+.callout-note .callout-content strong { color: var(--primary); }
+
+.callout-warning {
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+}
+.callout-warning .callout-content strong { color: #D48806; }
+
+.callout-success {
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+}
+.callout-success .callout-content strong { color: var(--success); }
+
+.callout-error {
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+}
+.callout-error .callout-content strong { color: var(--error); }
+
+/* ===== FAQ Accordion ===== */
+.faq-list { margin: 16px 0; }
+
+.faq-item {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.faq-item:hover { border-color: var(--primary-light); }
+
+.faq-question {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 14px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  font-family: inherit;
+  transition: background .15s;
+  line-height: 1.4;
+}
+.faq-question:hover { background: var(--bg-base); }
+
+.faq-question .faq-arrow {
+  margin-left: auto;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  transition: transform .25s ease;
+  font-size: 14px;
+}
+.faq-item.open .faq-question .faq-arrow { transform: rotate(180deg); }
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .35s ease, padding .35s ease;
+  padding: 0 18px;
+}
+.faq-item.open .faq-answer {
+  max-height: 600px;
+  padding: 0 18px 14px;
+}
+.faq-answer p { margin: 6px 0; font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+.faq-answer ul, .faq-answer ol { margin: 6px 0 6px 20px; font-size: 14px; color: var(--text-secondary); }
+.faq-answer li { margin: 2px 0; }
+
+/* ===== Section intro ===== */
+.section-intro {
+  margin: 12px 0;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+/* ===== Feature list ===== */
+.feature-list {
+  list-style: none;
+  margin: 12px 0 !important;
+  padding: 0 !important;
+}
+.feature-list li {
+  padding: 8px 0 8px 28px;
+  position: relative;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.feature-list li::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 15px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  opacity: .4;
+}
+
+/* ===== Back to Top ===== */
+.back-to-top {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-container);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  font-size: 18px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: all .25s ease;
+  pointer-events: none;
+  z-index: 50;
+}
+.back-to-top.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.back-to-top:hover {
+  color: var(--primary);
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ===== Sidebar overlay (mobile) ===== */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.3);
+  z-index: 90;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px) {
+  .doc-content { padding: 32px 32px 64px; }
+}
+
+@media (max-width: 768px) {
+  .doc-header { padding: 0 16px; }
+  .doc-header-label { display: none; }
+  .doc-header-right a { display: none; }
+  .toc-toggle { display: inline-flex; align-items: center; justify-content: center; }
+
+  .doc-sidebar {
+    position: fixed;
+    top: var(--header-h);
+    left: -280px;
+    width: 280px;
+    height: calc(100vh - var(--header-h));
+    z-index: 91;
+    transition: left .3s ease;
+    box-shadow: var(--shadow-lg);
+  }
+  .doc-sidebar.open { left: 0; }
+  .sidebar-overlay.show { display: block; }
+
+  .doc-content { padding: 24px 20px 64px; }
+
+  .doc-content h2 { font-size: 22px; }
+  .doc-content pre { font-size: 12px; padding: 14px 16px; }
+
+  .level-grid { grid-template-columns: 1fr; }
+
+  .step-card { padding: 12px 16px 12px 48px; }
+  .step-card::before { left: 12px; top: 12px; width: 26px; height: 26px; font-size: 12px; }
+
+  .back-to-top { bottom: 20px; right: 20px; }
+}
+
+/* ===== Print ===== */
+@media print {
+  .doc-header, .doc-sidebar, .back-to-top, .toc-toggle { display: none !important; }
+  .doc-layout { display: block; }
+  .doc-content { padding: 0; }
+  .faq-answer { max-height: none !important; }
+  .step-card { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<!-- ======== Header ======== -->
+<header class="doc-header">
+  <a href="/" class="doc-header-logo">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <rect width="28" height="28" rx="6" fill="#1677FF"/>
+      <path d="M8 20V8h6l3 3h3v9H8z" fill="white" opacity=".95"/>
+      <path d="M11 12h6M11 15h6M11 18h4" stroke="#1677FF" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <span>文档托管平台</span>
+  </a>
+  <div class="doc-header-divider"></div>
+  <span class="doc-header-label">使用文档</span>
+  <div class="doc-header-right">
+    <a href="/">返回平台</a>
+  </div>
+  <button class="toc-toggle" id="tocToggle" aria-label="切换目录">☰</button>
+</header>
+
+<!-- ======== Layout ======== -->
+<div class="doc-layout">
+
+  <!-- Sidebar -->
+  <aside class="doc-sidebar" id="sidebar">
+    <div class="sidebar-title">目录</div>
+    <ul class="sidebar-nav" id="toc">
+      <li><a href="#quickstart" class="sidebar-link active"><span class="dot"></span>快速上手</a>
+        <ul class="sidebar-sub">
+          <li><a href="#login" class="sidebar-sub-link">登录平台</a></li>
+          <li><a href="#create-project" class="sidebar-sub-link">创建项目</a></li>
+          <li><a href="#upload" class="sidebar-sub-link">上传文档</a></li>
+          <li><a href="#access" class="sidebar-sub-link">访问文档</a></li>
+        </ul>
+      </li>
+      <li><a href="#security" class="sidebar-link"><span class="dot"></span>安全等级说明</a></li>
+      <li><a href="#url-rename" class="sidebar-link"><span class="dot"></span>URL 重命名</a></li>
+      <li><a href="#l4-approval" class="sidebar-link"><span class="dot"></span>L4 审批流程</a></li>
+      <li><a href="#favorites" class="sidebar-link"><span class="dot"></span>收藏功能</a></li>
+      <li><a href="#directory-listing" class="sidebar-link"><span class="dot"></span>目录列表</a></li>
+      <li><a href="#faq" class="sidebar-link"><span class="dot"></span>常见问题</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="doc-content">
+
+    <!-- ===== 快速上手 ===== -->
+    <h2 id="quickstart">快速上手<a href="#quickstart" class="anchor-link">#</a></h2>
+
+    <h3 id="login">1. 登录平台<a href="#login" class="anchor-link">#</a></h3>
+    <div class="steps">
+      <div class="step-card"><p>打开浏览器访问平台地址，点击右上角 <strong>"登录"</strong> 按钮</p></div>
+      <div class="step-card"><p>使用飞书扫码或账号密码登录</p></div>
+      <div class="step-card"><p>登录后右上角显示你的头像和昵称，导航栏出现 <strong>"我的项目"</strong></p></div>
+    </div>
+
+    <h3 id="create-project">2. 创建项目<a href="#create-project" class="anchor-link">#</a></h3>
+    <div class="steps">
+      <div class="step-card"><p>点击导航栏 <strong>"我的项目"</strong>，然后点击 <strong>"+ 创建项目"</strong></p></div>
+      <div class="step-card"><p>填写项目信息：项目名称、可见路径、安全等级等</p></div>
+      <div class="step-card"><p>点击 <strong>"创建项目"</strong>，完成创建</p></div>
+    </div>
+
+    <h3 id="upload">3. 上传文档<a href="#upload" class="anchor-link">#</a></h3>
+    <div class="steps">
+      <div class="step-card"><p>在"我的项目"中，点击项目卡片上的 <strong>"上传"</strong> 按钮</p></div>
+      <div class="step-card"><p>拖拽文件到虚线区域，或点击选择文件 / 文件夹</p></div>
+      <div class="step-card"><p>等待上传完成，查看上传结果统计</p></div>
+    </div>
+
+    <h3 id="access">4. 访问文档<a href="#access" class="anchor-link">#</a></h3>
+    <p>根据安全等级不同，访问方式有所区别：</p>
+    <ul>
+      <li><strong>L1 / L2</strong> — 直接通过 URL 访问，无需任何认证</li>
+      <li><strong>L3</strong> — 需要飞书登录后访问</li>
+      <li><strong>L4</strong> — 需登录并提交访问申请，项目管理员审批通过后访问</li>
+    </ul>
+
+    <!-- ===== 安全等级 ===== -->
+    <h2 id="security">安全等级说明<a href="#security" class="anchor-link">#</a></h2>
+    <p class="section-intro">平台提供四级安全体系，满足从公开到机密的各类文档防护需求。</p>
+
+    <div class="level-grid">
+      <div class="level-card">
+        <div class="level-card-header">
+          <span class="level-tag tag-l1">L1</span>
+          <h4>完全公开</h4>
+        </div>
+        <p>无需任何认证，所有人可直接访问。适合对外文档、公开知识库。</p>
+      </div>
+      <div class="level-card">
+        <div class="level-card-header">
+          <span class="level-tag tag-l2">L2</span>
+          <h4>公开</h4>
+        </div>
+        <p>无需登录，与 L1 暂无明显区别，预留给未来内外部公开区分。</p>
+      </div>
+      <div class="level-card">
+        <div class="level-card-header">
+          <span class="level-tag tag-l3">L3</span>
+          <h4>登录可见</h4>
+        </div>
+        <p>需要飞书登录后才可访问。适合内部敏感文档。</p>
+      </div>
+      <div class="level-card">
+        <div class="level-card-header">
+          <span class="level-tag tag-l4">L4</span>
+          <h4>申请审批</h4>
+        </div>
+        <p>需要飞书登录 + 提交访问申请，管理员审批通过后访问。适合机密文档。</p>
+      </div>
+    </div>
+
+    <div class="callout callout-note">
+      <div class="callout-icon">ℹ</div>
+      <div class="callout-content">
+        <strong>提示</strong>
+        <p>所有等级均可额外叠加密码保护，访问时需要输入密码。</p>
+      </div>
+    </div>
+
+    <!-- ===== URL 重命名 ===== -->
+    <h2 id="url-rename">URL 重命名<a href="#url-rename" class="anchor-link">#</a></h2>
+    <p>将上传的文件自定义访问 URL。例如上传 <code>aaa.html</code>，设置 URL 名称为 <code>testpage</code>：</p>
+    <pre><code><span class="comment-highlight"># 原始路径</span>
+http://host/project/engineering-docs/<span class="url-highlight">aaa.html</span>
+
+<span class="comment-highlight"># 命名后</span>
+http://host/project/engineering-docs/<span class="string-highlight">testpage</span></code></pre>
+
+    <h3>操作步骤</h3>
+    <div class="steps">
+      <div class="step-card"><p>在项目卡片点击 <strong>"URL重命名"</strong></p></div>
+      <div class="step-card"><p>找到要重命名的文件</p></div>
+      <div class="step-card"><p>在输入框中输入想要的 URL 名称，点击 <strong>"保存"</strong></p></div>
+      <div class="step-card"><p>清除命名可点击 <strong>"清除"</strong>，恢复原路径访问</p></div>
+    </div>
+
+    <div class="callout callout-warning">
+      <div class="callout-icon">⚠</div>
+      <div class="callout-content">
+        <strong>注意</strong>
+        <p>命名后原路径将不可访问（返回 404）。URL 名称在同一项目内唯一，仅支持字母、数字、下划线和短横线。</p>
+      </div>
+    </div>
+
+    <!-- ===== L4 审批 ===== -->
+    <h2 id="l4-approval">L4 审批流程<a href="#l4-approval" class="anchor-link">#</a></h2>
+    <p class="section-intro">L4 项目需要提交访问申请，经管理员审批后方可查看内容。审批全程通过飞书消息卡片完成，即时高效。</p>
+
+    <h3>作为申请者</h3>
+    <div class="steps">
+      <div class="step-card"><p>访问 L4 项目时，看到"无权限"页面</p></div>
+      <div class="step-card"><p>已登录飞书的情况下，可填写申请理由并点击 <strong>"提交访问申请"</strong></p></div>
+      <div class="step-card"><p>管理员会收到飞书消息卡片，含"同意"/"拒绝"按钮</p></div>
+      <div class="step-card"><p>审批通过后收到绿色卡片通知，点击链接即可访问</p></div>
+      <div class="step-card"><p>审批被拒绝时收到红色卡片通知</p></div>
+    </div>
+
+    <h3>作为管理员（项目创建者）</h3>
+    <div class="steps">
+      <div class="step-card"><p>直接在飞书中点击消息卡片的 <strong>"同意"</strong> 或 <strong>"拒绝"</strong> 按钮</p></div>
+      <div class="step-card"><p>或在"我的项目"中进入项目 → <strong>"审批"</strong> 页面统一管理</p></div>
+      <div class="step-card"><p>审批记录可在"待处理 / 已批准 / 已拒绝"标签页中查看</p></div>
+    </div>
+
+    <!-- ===== 收藏 ===== -->
+    <h2 id="favorites">收藏功能<a href="#favorites" class="anchor-link">#</a></h2>
+    <p>登录后可以收藏文件或目录，方便快速访问高频内容。</p>
+    <ul class="feature-list">
+      <li>浏览项目文件时，点击收藏图标收藏文件或目录</li>
+      <li>点击导航栏 <strong>"我的收藏"</strong> 查看所有收藏内容</li>
+      <li>每个收藏项显示项目名称和文件路径，一目了然</li>
+      <li>点击 <strong>"取消收藏"</strong> 可移除</li>
+    </ul>
+
+    <!-- ===== 目录列表 ===== -->
+    <h2 id="directory-listing">目录列表<a href="#directory-listing" class="anchor-link">#</a></h2>
+    <p>控制项目目录是否允许被浏览：</p>
+    <ul>
+      <li><strong>允许目录列表（默认）</strong> — 访问目录时显示所有文件和子目录列表。存在 <code>index.html</code> 时自动渲染</li>
+      <li><strong>禁止目录列表</strong> — 访问目录路径时返回 404，只能直接访问已知文件路径</li>
+    </ul>
+
+    <div class="callout callout-note">
+      <div class="callout-icon">ℹ</div>
+      <div class="callout-content">
+        <strong>建议</strong>
+        <p>敏感项目关闭目录列表，防止文件被遍历扫描。</p>
+      </div>
+    </div>
+
+    <!-- ===== FAQ ===== -->
+    <h2 id="faq">常见问题<a href="#faq" class="anchor-link">#</a></h2>
+
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <button class="faq-question">
+          为什么上传后访问文件显示 404？
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>可能的原因：</p>
+          <ul>
+            <li>目录列表已关闭，需要通过直接文件路径访问</li>
+            <li>文件已被 URL 重命名，原路径被禁用</li>
+            <li>文件尚未上传完成</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          如何分享文件给其他人？
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>根据安全等级的不同：</p>
+          <ul>
+            <li><strong>L1 / L2</strong> — 直接分享文件 URL 即可</li>
+            <li><strong>L3</strong> — 对方需要用飞书登录</li>
+            <li><strong>L4</strong> — 对方需要登录并提交访问申请</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          忘记项目密码怎么办？
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>目前不支持找回密码。如有需要可以删除项目重新创建，或联系管理员处理。</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          上传文件夹时目录结构会保留吗？
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>会。使用"选择文件夹"上传时，文件在服务器上保持原有的目录结构。</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          L4 审批后多久能访问？
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>审批通过后即时生效，无需刷新页面即可访问。</p>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- Back to Top -->
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+<!-- Sidebar Overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ======== Scroll Spy ======== */
+  const headings = document.querySelectorAll('.doc-content h2[id], .doc-content h3[id]');
+  const sidebarLinks = document.querySelectorAll('.sidebar-link, .sidebar-sub-link');
+
+  function updateActiveSidebar() {
+    const scrollY = window.scrollY + 90;
+    let activeId = null;
+
+    for (const h of headings) {
+      if (h.offsetTop <= scrollY) activeId = h.id;
+    }
+
+    sidebarLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + activeId);
+    });
+  }
+
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => { updateActiveSidebar(); ticking = false; });
+      ticking = true;
+    }
+  });
+  updateActiveSidebar();
+
+  /* ======== Back to Top ======== */
+  const backBtn = document.getElementById('backToTop');
+  window.addEventListener('scroll', () => {
+    backBtn.classList.toggle('visible', window.scrollY > 400);
+  });
+  backBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  /* ======== FAQ Accordion ======== */
+  document.querySelectorAll('.faq-question').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      // Close others
+      document.querySelectorAll('.faq-item.open').forEach(other => {
+        if (other !== item) other.classList.remove('open');
+      });
+      item.classList.toggle('open');
+    });
+  });
+
+  /* ======== Mobile TOC Toggle ======== */
+  const tocToggle = document.getElementById('tocToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('show');
+  }
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('show');
+  }
+
+  tocToggle.addEventListener('click', () => {
+    if (sidebar.classList.contains('open')) closeSidebar();
+    else openSidebar();
+  });
+  overlay.addEventListener('click', closeSidebar);
+
+  // Close sidebar on link click (mobile)
+  sidebarLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 768) closeSidebar();
+    });
+  });
+
+  /* ======== Keyboard: ESC close sidebar ======== */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && sidebar.classList.contains('open')) closeSidebar();
+  });
+
+})();
+</script>
+</body>
+</html>

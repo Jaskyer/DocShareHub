@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}文档托管平台{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">文档托管平台</h1>
+        <p class="page-subtitle">上传、管理和分享你的文档</p>
+    </div>
+</div>
+
+<div id="publicProjects">
+    <div class="loading-spinner" style="margin: 48px auto;"></div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+async function loadPublicProjects() {
+    try {
+        const data = await API.get('/api/projects/public');
+        const container = document.getElementById('publicProjects');
+        if (data.projects && data.projects.length > 0) {
+            let html = '<div class="card-grid">';
+            for (const p of data.projects) {
+                const levelLabel = 'L' + p.security_level;
+                const hasFiles = (p.document_count || 0) > 0;
+                const cardStyle = 'cursor:pointer';
+                html += `
+                    <div class="project-card" style="text-decoration:none;color:inherit;${cardStyle}" onclick="${hasFiles ? `window.location='/${escapeHtml(p.visible_path)}'` : `showAlert('该项目暂未上传文件', '提示')`}" title="${hasFiles ? '' : '暂无开放文件'}">
+                        <div class="project-card-title">${escapeHtml(p.name)}</div>
+                        <div class="project-card-path">/${escapeHtml(p.visible_path)}</div>
+                        ${p.description ? `<div class="project-card-desc">${escapeHtml(p.description)}</div>` : ''}
+                        <div class="project-card-meta">
+                            <span class="tag tag-l${p.security_level}">${levelLabel}</span>
+                            ${hasFiles ? '' : '<span class="tag" style="background:var(--bg-warning);color:var(--text-secondary);">暂无文件</span>'}
+                        </div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📄</div>
+                    <div class="empty-state-title">暂无公开项目</div>
+                    <div class="empty-state-desc">${currentUser ? '还没有公开项目，去创建你的第一个项目吧' : '还没有公开的文档项目，请登录后创建'}</div>
+                    <a href="${currentUser ? '/my-projects/create' : '/login'}" class="btn btn-primary">${currentUser ? '创建项目' : '登录创建项目'}</a>
+                </div>
+            `;
+        }
+    } catch (err) {
+        document.getElementById('publicProjects').innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">⚠️</div>
+                <div class="empty-state-title">加载失败</div>
+                <div class="empty-state-desc">${escapeHtml(err.message || '无法加载项目列表')}</div>
+            </div>
+        `;
+    }
+}
+document.addEventListener('DOMContentLoaded', loadPublicProjects);
+</script>
+{% endblock %}
